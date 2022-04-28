@@ -80,7 +80,7 @@ public class EndEntityCertIssuanceTest {
 
     private static final Logger log = Logger.getLogger(EndEntityCertIssuanceTest.class.getName());
     private static final String EMAIL = "knca@pki.gov.kz";
-    private static final char[] PASSWORD = "1234567890".toCharArray();
+    private static final char[] PASSWORD = "123456".toCharArray();
     private static final String PATH = "/tmp";
     private static Provider provider;
 
@@ -127,7 +127,7 @@ public class EndEntityCertIssuanceTest {
 
     public void generate(String subjectDn, DERObjectIdentifier[] ekus, DERObjectIdentifier policyInfo, String folder,
             String filename) throws Exception {
-        Storage storage = Storage.ETOKEN_5110;
+        Storage storage = Storage.PKCS12;
         log.info("***** Load the root keystore");
         KeyStore rootKeyStore = KeyStore.getInstance("PKCS12", provider);
         String interPath = INTER_PATH + ".p12";

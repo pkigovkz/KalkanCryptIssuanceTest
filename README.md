@@ -8,4 +8,4 @@ End-entity entries may be stored in any keystore supported by Kalkancrypt (PKCS#
 
 Simply run
 
-`mvn package`
+`mvn test`
