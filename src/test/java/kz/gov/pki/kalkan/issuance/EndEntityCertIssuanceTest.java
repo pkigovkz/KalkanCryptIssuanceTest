@@ -40,6 +40,7 @@ import kz.gov.pki.kalkan.asn1.ASN1Set;
 import kz.gov.pki.kalkan.asn1.DERBitString;
 import kz.gov.pki.kalkan.asn1.DEREncodable;
 import kz.gov.pki.kalkan.asn1.DERInteger;
+import kz.gov.pki.kalkan.asn1.DERNull;
 import kz.gov.pki.kalkan.asn1.DERObject;
 import kz.gov.pki.kalkan.asn1.DERObjectIdentifier;
 import kz.gov.pki.kalkan.asn1.DEROctetString;
@@ -47,6 +48,7 @@ import kz.gov.pki.kalkan.asn1.DERSequence;
 import kz.gov.pki.kalkan.asn1.DERSequenceGenerator;
 import kz.gov.pki.kalkan.asn1.DERSet;
 import kz.gov.pki.kalkan.asn1.knca.KNCAObjectIdentifiers;
+import kz.gov.pki.kalkan.asn1.ocsp.OCSPObjectIdentifiers;
 import kz.gov.pki.kalkan.asn1.x509.AccessDescription;
 import kz.gov.pki.kalkan.asn1.x509.AuthorityKeyIdentifier;
 import kz.gov.pki.kalkan.asn1.x509.CRLDistPoint;
@@ -54,6 +56,7 @@ import kz.gov.pki.kalkan.asn1.x509.DistributionPoint;
 import kz.gov.pki.kalkan.asn1.x509.DistributionPointName;
 import kz.gov.pki.kalkan.asn1.x509.GeneralName;
 import kz.gov.pki.kalkan.asn1.x509.GeneralNames;
+import kz.gov.pki.kalkan.asn1.x509.KeyPurposeId;
 import kz.gov.pki.kalkan.asn1.x509.KeyStoreInfo;
 import kz.gov.pki.kalkan.asn1.x509.PolicyInformation;
 import kz.gov.pki.kalkan.asn1.x509.PolicyQualifierInfo;
@@ -96,7 +99,7 @@ public class EndEntityCertIssuanceTest {
     @Test
     public void generateUser() throws Exception {
         generate(SUBJECT_DN,
-                new DERObjectIdentifier[] { new DERObjectIdentifier("1.3.6.1.5.5.7.3.4"),
+                new DERObjectIdentifier[] { KeyPurposeId.id_kp_emailProtection,
                         new DERObjectIdentifier("1.2.398.3.3.4.1.1") },
                 new DERObjectIdentifier("1.2.398.3.3.2.3"), PATH, "user");
     }
@@ -104,15 +107,15 @@ public class EndEntityCertIssuanceTest {
     @Test
     public void generateLegalChief() throws Exception {
         generate(SUBJECT_LEGAL_CHIEF_DN,
-                new DERObjectIdentifier[] { new DERObjectIdentifier("1.3.6.1.5.5.7.3.4"),
+                new DERObjectIdentifier[] { KeyPurposeId.id_kp_emailProtection,
                         new DERObjectIdentifier("1.2.398.3.3.4.1.2"), new DERObjectIdentifier("1.2.398.3.3.4.1.2.1") },
                 new DERObjectIdentifier("1.2.398.3.3.2.1"), PATH, "legal_chief");
     }
-
+    
     @Test
     public void generateLegalSigner() throws Exception {
         generate(SUBJECT_LEGAL_SIGNER_DN,
-                new DERObjectIdentifier[] { new DERObjectIdentifier("1.3.6.1.5.5.7.3.4"),
+                new DERObjectIdentifier[] { KeyPurposeId.id_kp_emailProtection,
                         new DERObjectIdentifier("1.2.398.3.3.4.1.2"), new DERObjectIdentifier("1.2.398.3.3.4.1.2.2") },
                 new DERObjectIdentifier("1.2.398.3.3.2.1"), PATH, "legal_signer");
     }
@@ -120,9 +123,22 @@ public class EndEntityCertIssuanceTest {
     @Test
     public void generateLegalStaff() throws Exception {
         generate(SUBJECT_LEGAL_STAFF_DN,
-                new DERObjectIdentifier[] { new DERObjectIdentifier("1.3.6.1.5.5.7.3.4"),
+                new DERObjectIdentifier[] { KeyPurposeId.id_kp_emailProtection,
                         new DERObjectIdentifier("1.2.398.3.3.4.1.2"), new DERObjectIdentifier("1.2.398.3.3.4.1.2.5") },
                 new DERObjectIdentifier("1.2.398.3.3.2.1"), PATH, "legal_staff");
+    }
+    
+    @Test
+    public void generateOcspSigning() throws Exception {
+        generate(SUBJECT_OCSP_RESPONDER_DN,
+                new DERObjectIdentifier[] { KeyPurposeId.id_kp_OCSPSigning }, null, PATH, "ocsp_responder");
+    }
+    
+    @Test
+    public void generateTspSigning() throws Exception {
+        generate(SUBJECT_TSA_DN,
+                new DERObjectIdentifier[] { KeyPurposeId.id_kp_timeStamping },
+                KNCAObjectIdentifiers.tsa_policy_id, PATH, "tsa");
     }
 
     public void generate(String subjectDn, DERObjectIdentifier[] ekus, DERObjectIdentifier policyInfo, String folder,
@@ -136,7 +152,7 @@ public class EndEntityCertIssuanceTest {
         Enumeration<String> rootAliases = rootKeyStore.aliases();
         String rootAlias = rootAliases.nextElement();
         log.info("root alias = " + rootAlias);
-        PrivateKey rootPrivKey = (PrivateKey) rootKeyStore.getKey(rootAlias, PASSWORD);
+        PrivateKey rootPrivKey = (PrivateKey) rootKeyStore.getKey(rootAlias, INTER_PASSWORD);
         X509Certificate rootCert = (X509Certificate) rootKeyStore.getCertificate(rootAlias);
         log.info("root subject = " + rootCert.getSubjectDN());
 
@@ -321,92 +337,118 @@ public class EndEntityCertIssuanceTest {
         SubjectKeyIdentifier subjectKeyIdentifier = new SubjectKeyIdentifier(
                 request.getCertificationRequestInfo().getSubjectPublicKeyInfo());
         log.info("cert keyId = " + Hex.encodeStr(subjectKeyIdentifier.getKeyIdentifier()));
-        x509ExtGen.addExtension(X509Extensions.KeyUsage, true,
-                END_ENTITY_KEY_USAGE);
+        
+        boolean isOcspSigning = false;
+        boolean isTimeStamping = false;
+        
         DERSequenceGenerator extKeyUsageSeq = new DERSequenceGenerator(baos);
-        for (int i = 0; i < ekus.length; i++) {
-            extKeyUsageSeq.addObject(ekus[i]);
+        if (ekus.length == 1) {
+            x509ExtGen.addExtension(X509Extensions.KeyUsage, true, SERVICE_KEY_USAGE);
+            if (KeyPurposeId.id_kp_OCSPSigning.equals(ekus[0])) {
+                isOcspSigning = true;
+                x509ExtGen.addExtension(OCSPObjectIdentifiers.id_pkix_ocsp_nocheck, false, new DERNull());
+            } else if (KeyPurposeId.id_kp_timeStamping.equals(ekus[0])) {
+                isTimeStamping = true;
+            } else {
+                throw new IllegalArgumentException("A service certificate requires a particular key purpose!");
+            }
+            extKeyUsageSeq.addObject(ekus[0]);
+        } else {
+            x509ExtGen.addExtension(X509Extensions.KeyUsage, true, END_ENTITY_KEY_USAGE);
+            for (int i = 0; i < ekus.length; i++) {
+                extKeyUsageSeq.addObject(ekus[i]);
+            }
         }
         extKeyUsageSeq.close();
-        x509ExtGen.addExtension(X509Extensions.ExtendedKeyUsage, false, baos.toByteArray());
+        x509ExtGen.addExtension(X509Extensions.ExtendedKeyUsage, isTimeStamping, baos.toByteArray());
         x509ExtGen.addExtension(X509Extensions.SubjectKeyIdentifier, false, subjectKeyIdentifier);
         x509ExtGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false,
                 new AuthorityKeyIdentifier(authKeyIdBytes));
-        PolicyQualifierInfo policyQualifierInfo = new PolicyQualifierInfo(POLICY_URL);
-        PolicyInformation policyInformation = new PolicyInformation(policyInfo,
-                new DERSequence((ASN1Sequence) policyQualifierInfo.toASN1Object()));
-        x509ExtGen.addExtension(X509Extensions.CertificatePolicies, false, new DERSequence(policyInformation));
-        AccessDescription accessDescriptionOcsp = new AccessDescription(new DERObjectIdentifier("1.3.6.1.5.5.7.48.1"),
-                new GeneralName(GeneralName.uniformResourceIdentifier, OCSP_URL));
-        AccessDescription accessDescriptionIssuer = new AccessDescription(new DERObjectIdentifier("1.3.6.1.5.5.7.48.2"),
-                new GeneralName(GeneralName.uniformResourceIdentifier,
-                        INTER_CERT_URL));
-        baos.reset();
-        DERSequenceGenerator infoAccessSeq = new DERSequenceGenerator(baos);
-        infoAccessSeq.addObject(accessDescriptionOcsp);
-        infoAccessSeq.addObject(accessDescriptionIssuer);
-        infoAccessSeq.close();
-        x509ExtGen.addExtension(X509Extensions.AuthorityInfoAccess, false, baos.toByteArray());
-        CRLDistPoint crlDistPoint = new CRLDistPoint(new DistributionPoint[] { new DistributionPoint(
-                new DistributionPointName(new GeneralNames(new GeneralName(GeneralName.uniformResourceIdentifier,
-                        INTER_CRL_URL))),
-                null, null) });
-        x509ExtGen.addExtension(X509Extensions.CRLDistributionPoints, false, crlDistPoint);
-        CRLDistPoint deltaDistPoint = new CRLDistPoint(new DistributionPoint[] { new DistributionPoint(
-                new DistributionPointName(new GeneralNames(new GeneralName(GeneralName.uniformResourceIdentifier,
-                        INTER_DELTA_CRL_URL))),
-                null, null) });
-        x509ExtGen.addExtension(X509Extensions.FreshestCRL, false, deltaDistPoint);
-
-        ASN1Set criAttributes = request.getCertificationRequestInfo().getAttributes();
-        Enumeration<DEREncodable> objects = criAttributes.getObjects();
-        X509Attribute extensionRequest = null;
-        while (objects.hasMoreElements()) {
-            X509Attribute attribute = (X509Attribute) objects.nextElement();
-            if (PKCS10CertificationRequest.extensionRequest.getId().equals(attribute.getOID())) {
-                extensionRequest = attribute;
-                break;
+        
+        if (policyInfo != null) {
+            PolicyQualifierInfo policyQualifierInfo = new PolicyQualifierInfo(POLICY_URL);
+            PolicyInformation policyInformation = new PolicyInformation(policyInfo,
+                    new DERSequence((ASN1Sequence) policyQualifierInfo.toASN1Object()));
+            x509ExtGen.addExtension(X509Extensions.CertificatePolicies, false, new DERSequence(policyInformation));
+        }
+        
+        if (!isOcspSigning) {
+        
+            AccessDescription accessDescriptionOcsp = new AccessDescription(AccessDescription.id_ad_ocsp,
+                    new GeneralName(GeneralName.uniformResourceIdentifier, OCSP_URL));
+            AccessDescription accessDescriptionIssuer = new AccessDescription(AccessDescription.id_ad_caIssuers,
+                    new GeneralName(GeneralName.uniformResourceIdentifier,
+                            INTER_CERT_URL));
+            baos.reset();
+            DERSequenceGenerator infoAccessSeq = new DERSequenceGenerator(baos);
+            infoAccessSeq.addObject(accessDescriptionOcsp);
+            infoAccessSeq.addObject(accessDescriptionIssuer);
+            infoAccessSeq.close();
+            x509ExtGen.addExtension(X509Extensions.AuthorityInfoAccess, false, baos.toByteArray());
+            CRLDistPoint crlDistPoint = new CRLDistPoint(new DistributionPoint[] { new DistributionPoint(
+                    new DistributionPointName(new GeneralNames(new GeneralName(GeneralName.uniformResourceIdentifier,
+                            INTER_CRL_URL))),
+                    null, null) });
+            x509ExtGen.addExtension(X509Extensions.CRLDistributionPoints, false, crlDistPoint);
+            CRLDistPoint deltaDistPoint = new CRLDistPoint(new DistributionPoint[] { new DistributionPoint(
+                    new DistributionPointName(new GeneralNames(new GeneralName(GeneralName.uniformResourceIdentifier,
+                            INTER_DELTA_CRL_URL))),
+                    null, null) });
+            x509ExtGen.addExtension(X509Extensions.FreshestCRL, false, deltaDistPoint);
+    
+            if (!isTimeStamping) {
+                ASN1Set criAttributes = request.getCertificationRequestInfo().getAttributes();
+                Enumeration<DEREncodable> objects = criAttributes.getObjects();
+                X509Attribute extensionRequest = null;
+                while (objects.hasMoreElements()) {
+                    X509Attribute attribute = (X509Attribute) objects.nextElement();
+                    if (PKCS10CertificationRequest.extensionRequest.getId().equals(attribute.getOID())) {
+                        extensionRequest = attribute;
+                        break;
+                    }
+                }
+                if (extensionRequest == null) {
+                    throw new IllegalArgumentException("extensionRequest not found.");
+                }
+                ASN1Encodable[] values = extensionRequest.getValues();
+        
+                if (values.length != 1) {
+                    throw new IllegalArgumentException("extensionRequest should contain only X509Extensions value.");
+                }
+        
+                X509Extensions extensions = X509Extensions.getInstance(values[0]);
+        
+                X509Extension subjectAltNameExt = extensions.getExtension(X509Extensions.SubjectAlternativeName);
+                DERObject subjectAltNameSeq = ASN1Object.fromByteArray(subjectAltNameExt.getValue().getOctets());
+                GeneralNames generalNames = GeneralNames.getInstance(subjectAltNameSeq);
+                GeneralName[] names = generalNames.getNames();
+                ASN1EncodableVector sanVector = new ASN1EncodableVector();
+                for (int i = 0; i < names.length; i++) {
+                    GeneralName generalName = names[i];
+                    int tag = generalName.getTagNo();
+                    if (tag == GeneralName.dNSName || tag == GeneralName.rfc822Name) {
+                        sanVector.add(generalName);
+                    }
+                }
+        
+                if (sanVector.size() > 0) {
+                    DERSequence allowedGeneralNames = new DERSequence(sanVector);
+                    x509ExtGen.addExtension(X509Extensions.SubjectAlternativeName, false, allowedGeneralNames);
+                }
+        
+                X509Extension extension = extensions.getExtension(KNCAObjectIdentifiers.keystore_branch);
+                if (extension == null) {
+                    throw new IllegalArgumentException("keystore extension not found.");
+                }
+                DERObject derObject = ASN1Object.fromByteArray(extension.getValue().getOctets());
+                KeyStoreInfo keyStoreInfo = KeyStoreInfo.getInstance(derObject);
+        
+                x509ExtGen.addExtension(KNCAObjectIdentifiers.keystore_branch, false,
+                        new KeyStoreInfo(keyStoreInfo.getKeyStoreId()));
             }
+
         }
-        if (extensionRequest == null) {
-            throw new IllegalArgumentException("extensionRequest not found.");
-        }
-        ASN1Encodable[] values = extensionRequest.getValues();
-
-        if (values.length != 1) {
-            throw new IllegalArgumentException("extensionRequest should contain only X509Extensions value.");
-        }
-
-        X509Extensions extensions = X509Extensions.getInstance(values[0]);
-
-        X509Extension subjectAltNameExt = extensions.getExtension(X509Extensions.SubjectAlternativeName);
-        DERObject subjectAltNameSeq = ASN1Object.fromByteArray(subjectAltNameExt.getValue().getOctets());
-        GeneralNames generalNames = GeneralNames.getInstance(subjectAltNameSeq);
-        GeneralName[] names = generalNames.getNames();
-        ASN1EncodableVector sanVector = new ASN1EncodableVector();
-        for (int i = 0; i < names.length; i++) {
-            GeneralName generalName = names[i];
-            int tag = generalName.getTagNo();
-            if (tag == GeneralName.dNSName || tag == GeneralName.rfc822Name) {
-                sanVector.add(generalName);
-            }
-        }
-
-        if (sanVector.size() > 0) {
-            DERSequence allowedGeneralNames = new DERSequence(sanVector);
-            x509ExtGen.addExtension(X509Extensions.SubjectAlternativeName, false, allowedGeneralNames);
-        }
-
-        X509Extension extension = extensions.getExtension(KNCAObjectIdentifiers.keystore_branch);
-        if (extension == null) {
-            throw new IllegalArgumentException("keystore extension not found.");
-        }
-        DERObject derObject = ASN1Object.fromByteArray(extension.getValue().getOctets());
-        KeyStoreInfo keyStoreInfo = KeyStoreInfo.getInstance(derObject);
-
-        x509ExtGen.addExtension(KNCAObjectIdentifiers.keystore_branch, false,
-                new KeyStoreInfo(keyStoreInfo.getKeyStoreId()));
-
+        
         return x509ExtGen.generate();
     }
 

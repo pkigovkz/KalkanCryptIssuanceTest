@@ -14,7 +14,6 @@ public interface TestConstants {
 
     char[] ROOT_PASSWORD = "123456".toCharArray();
     char[] INTER_PASSWORD = "123456".toCharArray();
-    char[] PASSWORD = "123456".toCharArray();
 
     //  supported algorithms
     //  KNCAObjectIdentifiers.gost34311_95_with_gost34310_2004
@@ -33,6 +32,7 @@ public interface TestConstants {
     
     
     KeyUsage END_ENTITY_KEY_USAGE = new KeyUsage(KeyUsage.digitalSignature | KeyUsage.nonRepudiation);
+    KeyUsage SERVICE_KEY_USAGE = new KeyUsage(KeyUsage.digitalSignature);
     String POLICY_URL = "http://pki.gov.kz/cps";
     String INTER_DELTA_CRL_URL = "http://test.pki.gov.kz/crl/nca_gost2022_d_test.crl";
     String INTER_CRL_URL = "http://test.pki.gov.kz/crl/nca_gost2022_test.crl";
@@ -41,7 +41,9 @@ public interface TestConstants {
     String SUBJECT_DN = "CN=ҚҰНАНБАЙ АБАЙ, SURNAME=ҚҰНАНБАЙ, SN=IIN123456789012, C=KZ, G=ҚҰНАНБАЙҰЛЫ";
     String SUBJECT_LEGAL_CHIEF_DN = "CN=БӨКЕЙХАН ӘЛИХАН, SURNAME=БӨКЕЙХАН, SN=IIN123456789012, C=KZ, O=\"АЛАШ\" ПАРТИЯСЫ, OU=BIN012345678912, G=НҰРМҰХАМЕДҰЛЫ";
     String SUBJECT_LEGAL_SIGNER_DN = "CN=БАЙТҰРСЫН АХМЕТ, SURNAME=БАЙТҰРСЫН, SN=IIN123456789012, C=KZ, O=\"АЛАШ\" ПАРТИЯСЫ, OU=BIN012345678912, G=БАЙТҰРСЫНҰЛЫ";
-    String SUBJECT_LEGAL_STAFF_DN = "CN=МІРЖАҚЫП ДУЛАТ, SURNAME=МІРЖАҚЫП, SN=IIN123456789012, C=KZ, O=\"АЛАШ\" ПАРТИЯСЫ, OU=BIN012345678912, G=МІРЖАҚЫПҰЛЫ";
+    String SUBJECT_LEGAL_STAFF_DN = "CN=ДУЛАТ МІРЖАҚЫП, SURNAME=ДУЛАТ, SN=IIN123456789012, C=KZ, O=\"АЛАШ\" ПАРТИЯСЫ, OU=BIN012345678912, G=ДУЛАТҰЛЫ";
+    String SUBJECT_OCSP_RESPONDER_DN = "CN=OCSP RESPONDER, C=KZ";
+    String SUBJECT_TSA_DN = "CN=TIME-STAMPING AUTHORITY, C=KZ";
     String EMAIL = "knca@pki.gov.kz";
     
 }
