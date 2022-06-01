@@ -22,7 +22,7 @@
         <dependency>
             <groupId>kz.gov.pki.kalkan</groupId>
             <artifactId>knca_provider_jce_kalkan</artifactId>
-            <version>0.7-SNAPSHOT</version>
+            <version>0.7</version>
         </dependency>
     </dependencies>
 
