@@ -44,6 +44,7 @@ public interface TestConstants {
     String SUBJECT_LEGAL_CHIEF_DN = "CN=БӨКЕЙХАН ӘЛИХАН, SURNAME=БӨКЕЙХАН, SN=IIN123456789012, C=KZ, O=\"АЛАШ\" ПАРТИЯСЫ, OU=BIN012345678912, G=НҰРМҰХАМЕДҰЛЫ";
     String SUBJECT_LEGAL_SIGNER_DN = "CN=БАЙТҰРСЫН АХМЕТ, SURNAME=БАЙТҰРСЫН, SN=IIN123456789012, C=KZ, O=\"АЛАШ\" ПАРТИЯСЫ, OU=BIN012345678912, G=БАЙТҰРСЫНҰЛЫ";
     String SUBJECT_LEGAL_STAFF_DN = "CN=ДУЛАТ МІРЖАҚЫП, SURNAME=ДУЛАТ, SN=IIN123456789012, C=KZ, O=\"АЛАШ\" ПАРТИЯСЫ, OU=BIN012345678912, G=ДУЛАТҰЛЫ";
+    String SUBJECT_K2_DN = "CN=ШОҚАЙ МҰСТАФА, SURNAME=ШОҚАЙ, SN=IIN123456789012, C=KZ, O=\"АЛАШ\" ПАРТИЯСЫ, OU=BIN012345678912, BusinessCategory=KS01234, G=ШОҚАЙҰЛЫ, DC=ROLE04";
     String SUBJECT_OCSP_RESPONDER_DN = "CN=OCSP RESPONDER, C=KZ, O=ҰЛТТЫҚ КУӘЛАНДЫРУШЫ ОРТАЛЫҚ";
     String SUBJECT_TSA_DN = "CN=TIME-STAMPING AUTHORITY, C=KZ, O=ҰЛТТЫҚ КУӘЛАНДЫРУШЫ ОРТАЛЫҚ";
     String EMAIL = "knca@pki.gov.kz";

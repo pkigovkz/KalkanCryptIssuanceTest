@@ -129,6 +129,14 @@ public class EndEntityCertIssuanceTest {
     }
     
     @Test
+    public void generateK2() throws Exception {
+        generate(SUBJECT_K2_DN,
+                new DERObjectIdentifier[] { KeyPurposeId.id_kp_emailProtection,
+                        new DERObjectIdentifier("1.2.398.3.3.4.1.2"), new DERObjectIdentifier("1.2.398.5.19.1.2.2.1") },
+                POLICY_OID, PATH, "k2");
+    }
+    
+    @Test
     public void generateOcspSigning() throws Exception {
         generate(SUBJECT_OCSP_RESPONDER_DN,
                 new DERObjectIdentifier[] { KeyPurposeId.id_kp_OCSPSigning }, null, PATH, "ocsp_responder");
