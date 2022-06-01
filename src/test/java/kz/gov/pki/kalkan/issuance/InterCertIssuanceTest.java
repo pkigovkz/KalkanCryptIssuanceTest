@@ -215,7 +215,7 @@ public class InterCertIssuanceTest {
         x509ExtGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false,
                 new AuthorityKeyIdentifier(authKeyIdBytes));
         PolicyQualifierInfo policyQualifierInfo = new PolicyQualifierInfo(POLICY_URL);
-        PolicyInformation policyInformation = new PolicyInformation(new DERObjectIdentifier("1.2.398.3.3.1.1"),
+        PolicyInformation policyInformation = new PolicyInformation(POLICY_OID,
                 new DERSequence((ASN1Sequence) policyQualifierInfo.toASN1Object()));
         x509ExtGen.addExtension(X509Extensions.CertificatePolicies, false, new DERSequence(policyInformation));
         AuthorityInformationAccess authorityInformationAccess = new AuthorityInformationAccess(

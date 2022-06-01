@@ -1,6 +1,7 @@
 package kz.gov.pki.kalkan.issuance;
 
 
+import kz.gov.pki.kalkan.asn1.DERObjectIdentifier;
 import kz.gov.pki.kalkan.asn1.knca.KNCAObjectIdentifiers;
 import kz.gov.pki.kalkan.asn1.x509.KeyUsage;
 
@@ -33,6 +34,7 @@ public interface TestConstants {
     
     KeyUsage END_ENTITY_KEY_USAGE = new KeyUsage(KeyUsage.digitalSignature | KeyUsage.nonRepudiation);
     KeyUsage SERVICE_KEY_USAGE = new KeyUsage(KeyUsage.digitalSignature);
+    DERObjectIdentifier POLICY_OID = new DERObjectIdentifier("1.2.398.3.3.2");
     String POLICY_URL = "http://pki.gov.kz/cps";
     String INTER_DELTA_CRL_URL = "http://test.pki.gov.kz/crl/nca_gost2022_d_test.crl";
     String INTER_CRL_URL = "http://test.pki.gov.kz/crl/nca_gost2022_test.crl";
@@ -42,8 +44,8 @@ public interface TestConstants {
     String SUBJECT_LEGAL_CHIEF_DN = "CN=БӨКЕЙХАН ӘЛИХАН, SURNAME=БӨКЕЙХАН, SN=IIN123456789012, C=KZ, O=\"АЛАШ\" ПАРТИЯСЫ, OU=BIN012345678912, G=НҰРМҰХАМЕДҰЛЫ";
     String SUBJECT_LEGAL_SIGNER_DN = "CN=БАЙТҰРСЫН АХМЕТ, SURNAME=БАЙТҰРСЫН, SN=IIN123456789012, C=KZ, O=\"АЛАШ\" ПАРТИЯСЫ, OU=BIN012345678912, G=БАЙТҰРСЫНҰЛЫ";
     String SUBJECT_LEGAL_STAFF_DN = "CN=ДУЛАТ МІРЖАҚЫП, SURNAME=ДУЛАТ, SN=IIN123456789012, C=KZ, O=\"АЛАШ\" ПАРТИЯСЫ, OU=BIN012345678912, G=ДУЛАТҰЛЫ";
-    String SUBJECT_OCSP_RESPONDER_DN = "CN=OCSP RESPONDER, C=KZ";
-    String SUBJECT_TSA_DN = "CN=TIME-STAMPING AUTHORITY, C=KZ";
+    String SUBJECT_OCSP_RESPONDER_DN = "CN=OCSP RESPONDER, C=KZ, O=ҰЛТТЫҚ КУӘЛАНДЫРУШЫ ОРТАЛЫҚ";
+    String SUBJECT_TSA_DN = "CN=TIME-STAMPING AUTHORITY, C=KZ, O=ҰЛТТЫҚ КУӘЛАНДЫРУШЫ ОРТАЛЫҚ";
     String EMAIL = "knca@pki.gov.kz";
     
 }

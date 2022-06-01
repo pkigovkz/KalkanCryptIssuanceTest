@@ -101,7 +101,7 @@ public class EndEntityCertIssuanceTest {
         generate(SUBJECT_DN,
                 new DERObjectIdentifier[] { KeyPurposeId.id_kp_emailProtection,
                         new DERObjectIdentifier("1.2.398.3.3.4.1.1") },
-                new DERObjectIdentifier("1.2.398.3.3.2.3"), PATH, "user");
+                POLICY_OID, PATH, "user");
     }
 
     @Test
@@ -109,7 +109,7 @@ public class EndEntityCertIssuanceTest {
         generate(SUBJECT_LEGAL_CHIEF_DN,
                 new DERObjectIdentifier[] { KeyPurposeId.id_kp_emailProtection,
                         new DERObjectIdentifier("1.2.398.3.3.4.1.2"), new DERObjectIdentifier("1.2.398.3.3.4.1.2.1") },
-                new DERObjectIdentifier("1.2.398.3.3.2.1"), PATH, "legal_chief");
+                POLICY_OID, PATH, "legal_chief");
     }
     
     @Test
@@ -117,7 +117,7 @@ public class EndEntityCertIssuanceTest {
         generate(SUBJECT_LEGAL_SIGNER_DN,
                 new DERObjectIdentifier[] { KeyPurposeId.id_kp_emailProtection,
                         new DERObjectIdentifier("1.2.398.3.3.4.1.2"), new DERObjectIdentifier("1.2.398.3.3.4.1.2.2") },
-                new DERObjectIdentifier("1.2.398.3.3.2.1"), PATH, "legal_signer");
+                POLICY_OID, PATH, "legal_signer");
     }
 
     @Test
@@ -125,7 +125,7 @@ public class EndEntityCertIssuanceTest {
         generate(SUBJECT_LEGAL_STAFF_DN,
                 new DERObjectIdentifier[] { KeyPurposeId.id_kp_emailProtection,
                         new DERObjectIdentifier("1.2.398.3.3.4.1.2"), new DERObjectIdentifier("1.2.398.3.3.4.1.2.5") },
-                new DERObjectIdentifier("1.2.398.3.3.2.1"), PATH, "legal_staff");
+                POLICY_OID, PATH, "legal_staff");
     }
     
     @Test
