@@ -32,7 +32,7 @@ public interface TestConstants {
     String ROOT_POLICY_URL = "http://root.gov.kz/cps";
     
     
-    KeyUsage END_ENTITY_KEY_USAGE = new KeyUsage(KeyUsage.digitalSignature | KeyUsage.nonRepudiation);
+    KeyUsage END_ENTITY_KEY_USAGE = new KeyUsage(KeyUsage.digitalSignature | KeyUsage.nonRepudiation | KeyUsage.keyEncipherment);
     KeyUsage SERVICE_KEY_USAGE = new KeyUsage(KeyUsage.digitalSignature);
     DERObjectIdentifier POLICY_OID = new DERObjectIdentifier("1.2.398.3.3.2");
     String POLICY_URL = "http://pki.gov.kz/cps";
